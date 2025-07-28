@@ -141,4 +141,4 @@ This project is **dual-licensed**:
 Project name and branding are trademarked and may not be reused without permission.
 
 📧 Contact for commercial licensing: lordsodomiser@protonmail.com  
-💸 Support the project: https://your-donation-link.example
+💸 Support the project: https://ko-fi.com/lordsodomiser

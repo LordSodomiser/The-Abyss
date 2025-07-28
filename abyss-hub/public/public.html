@@ -1,0 +1,152 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public Chat</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <header>Welcome to the Anonymous Chat</header>
+    <div class="container">
+        <h2>Public Chat</h2>
+        <div id="user-count">Active Users: 0</div>
+        <div id="chat-messages" class="chat-box"></div>
+        <input type="text" id="message" placeholder="Type a message..." class="input-glow">
+        <button onclick="sendMessage()">Send</button>
+        <button onclick="logout()">Logout</button>
+        <button onclick="createPrivateRoom()">Create Private Room</button>
+        <button onclick="showInviteList()">Invite to Private Room</button>
+        <a href="/forum.html">Go to Forum</a>
+    </div>
+    <footer>© 2025 Anon Chat & Forum</footer>
+    <script src="/script.js"></script>
+    <script>
+        const ws = new WebSocket(`wss://${location.host}`);
+        const username = localStorage.getItem('username');
+        let lastActivity = Date.now();
+
+        ws.onopen = () => {
+            ws.send(JSON.stringify({ type: 'join', username }));
+        };
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            if (data.type === 'message') {
+                displayMessage(data.username, data.message, data.timestamp);
+            } else if (data.type === 'system') {
+                displaySystemMessage(data.message);
+            } else if (data.type === 'userCount') {
+                document.getElementById('user-count').textContent = `Active Users: ${data.count}`;
+            } else if (data.type === 'invite') {
+                if (confirm(`${data.from} invited you to a private room. Accept?`)) {
+                    ws.send(JSON.stringify({ type: 'acceptInvite', roomId: data.roomId, username }));
+                } else {
+                    ws.send(JSON.stringify({ type: 'declineInvite', roomId: data.roomId, username }));
+                }
+            }
+        };
+
+        function sendMessage() {
+            const message = document.getElementById('message').value.trim();
+            if (message) {
+                ws.send(JSON.stringify({ type: 'message', username, message }));
+                document.getElementById('message').value = '';
+                lastActivity = Date.now();
+            }
+        }
+
+        function createPrivateRoom() {
+            const roomName = prompt('Enter room name:');
+            const passphrase = prompt('Enter passphrase:');
+            if (roomName && passphrase) {
+                fetch('/create-room', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ roomName, passphrase, username })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.roomId) {
+                        localStorage.setItem('roomId', data.roomId);
+                        window.location.href = `/private.html?room=${data.roomId}`;
+                    } else {
+                        alert('Room creation failed.');
+                    }
+                });
+            }
+        }
+
+        function showInviteList() {
+            fetch('/active-users')
+                .then(res => res.json())
+                .then(users => {
+                    const userList = users.filter(u => u !== username).join(', ');
+                    const invitee = prompt(`Active users: ${userList}\nEnter username to invite:`);
+                    if (invitee) {
+                        const roomId = prompt('Enter room ID:');
+                        if (roomId) {
+                            ws.send(JSON.stringify({ type: 'invite', to: invitee, roomId, from: username }));
+                        }
+                    }
+                });
+        }
+
+        function logout() {
+            ws.send(JSON.stringify({ type: 'logout', username }));
+            localStorage.removeItem('username');
+            window.location.href = '/';
+        }
+
+        setInterval(() => {
+            if (Date.now() - lastActivity > 5 * 60 * 1000) {
+                logout();
+            }
+        }, 1000);
+
+        document.getElementById('message').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+            lastActivity = Date.now();
+        });
+    </script>
+</body>
+</html>

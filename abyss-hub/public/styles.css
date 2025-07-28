@@ -1,0 +1,115 @@
+body {
+    background-color: #000000;
+    color: #ff0000;
+    font-family: 'Times New Roman', Times, serif;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+header, footer {
+    background-color: #1a0000;
+    color: #ff0000;
+    padding: 10px;
+    font-size: 1.5em;
+    text-transform: uppercase;
+}
+
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+}
+
+h2 {
+    font-size: 2em;
+    margin-bottom: 20px;
+    color: #ff0000;
+}
+
+input, textarea, select {
+    background-color: #1a0000;
+    color: #ff0000;
+    border: 2px solid #ff0000;
+    padding: 10px;
+    margin: 10px 0;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: 'Times New Roman', Times, serif;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 5px #ff0000;
+    }
+    50% {
+        box-shadow: 0 0 15px #ff0000, 0 0 25px #ff0000;
+    }
+    100% {
+        box-shadow: 0 0 5px #ff0000;
+    }
+}
+
+input:focus, textarea:focus, select:focus {
+    outline: none;
+    animation: none;
+    box-shadow: 0 0 10px #ff0000;
+}
+
+button {
+    background-color: #ff0000;
+    color: #000000;
+    border: none;
+    padding: 10px 20px;
+    margin: 10px;
+    cursor: pointer;
+    font-family: 'Times New Roman', Times, serif;
+    text-transform: uppercase;
+}
+
+button:hover {
+    background-color: #cc0000;
+}
+
+.chat-box {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 2px solid #ff0000;
+    padding: 10px;
+    margin-bottom: 20px;
+    background-color: #000000;
+    color: #ff0000;
+}
+
+.message, .system-message {
+    margin: 10px 0;
+    text-align: left;
+    color: #ff0000;
+}
+
+.system-message {
+    font-style: italic;
+    color: #cc0000;
+}
+
+.post {
+    border: 2px solid #ff0000;
+    padding: 20px;
+    margin: 20px 0;
+    background-color: #000000;
+    color: #ff0000;
+}
+
+.comments {
+    margin-top: 10px;
+}
+
+a {
+    color: #ff0000;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #cc0000;
+}

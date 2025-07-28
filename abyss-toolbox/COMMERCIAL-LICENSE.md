@@ -19,4 +19,4 @@ contact the author for a commercial license:
 
 ## 💸 Support
 If this project helped you, you can donate here:
-👉 https://your-donation-link.example
+👉 https://ko-fi.com/lordsodomiser
