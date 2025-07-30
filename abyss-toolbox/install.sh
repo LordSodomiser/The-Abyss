@@ -13,20 +13,17 @@
 
 set -euo pipefail
 
-if [[ ! -d "/var/log/the-abyss" ]]; then
-
-	if [[ $EUID -ne 0 ]]; then
-		echo "Root privileges are required to run this script."
-		read -rp "Do you want to run it with sudo now? [y/N]: " answer
-		if [[ "$answer" =~ ^[Yy]$ ]]; then
-			exec sudo "$0" "$@"
-		else
-			echo "Exiting..."
-			exit 1
-		fi
+if [[ $EUID -ne 0 ]]; then
+	echo "Root privileges are required to run this script."
+	read -rp "Do you want to run it with sudo now? [y/N]: " answer
+	if [[ "$answer" =~ ^[Yy]$ ]]; then
+		exec sudo "$0" "$@"
+	else
+		echo "Exiting..."
+		exit 1
 	fi
 fi
-
+ 
 source "$(dirname "$0")/.configs/.env"
 
 mv "$DOWNLOAD_PATH" "$TOOLBOX_PATH"
