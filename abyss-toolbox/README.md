@@ -66,16 +66,22 @@ Minimal. Expandable. Terminal-first. Logged. Trapped. Controlled.
 ## Quick Start
 
 > **Step into `/tmp` or be consumed.**
-
 ```bash
 # (If you're not already in /tmp)
-mv /path/to/abyss.tar.xz /tmp/
 cd /tmp
+
+Download the Latest Release
+You can download and extract the latest .tar.gz release to /tmp using either wget or curl:
+Option 1: Using wget
+wget https://github.com/LordSodomiser/The-Abyss/releases/download/0.1.0/abyss_toolbox-0.1.0.tar.xz
+
+Option 2: Using curl
+curl -LO https://github.com/LordSodomiser/The-Abyss/releases/download/0.1.0/abyss_toolbox-0.1.0.tar.xz
 
 1. Extract the Archive
 
 tar -xJvf abyss.tar.xz
-cd the-abyss/abyss-toolbox/
+cd The-Abyss/abyss-toolbox
 
 2. Initialize the Environment
 Prepares traps, detects your distro, ensures permissions, and lays the foundation.
@@ -89,13 +95,13 @@ Installs required packages, places toolbox into your $PATH, and offers to clean 
 
 4. Invoke the Abyss (Should you run the cleanup, the directory you inhabit (/tmp) will vanish. You’ll need to ‘cd’ to emerge from the void.)
 
-toolbox
+cystoolbox
 Or if you’re still shy:
-cd /opt/the-abyss/abyss-toolbox/toolbox.sh
+cd /opt/The-Abyss/abyss-toolbox/toolbox.sh
 
 File Layout:
 
-the-abyss/
+The-Abyss/
 ├── abyss-goodies         # (Coming soon...) More admin tools
 └── abyss-toolbox/
     ├── toolbox.sh        # The main entrypoint
@@ -107,6 +113,10 @@ the-abyss/
 Philosophy
 Nothing is bloated. Nothing is wasted. Everything is logged.
 Written modularly so you can bend it to your will — or fork it into your own flavor of hell.
+
+External Dependencies
+This project uses junegunn/fzf, licensed under the MIT License.
+It is required but not bundled. it will be automatically installed using your distro’s package manager.
 
 Created and Maintained By
 LordSodomiser (Into the Abyss) <lordsodomiser@proton.me>
@@ -124,14 +134,6 @@ Limitations:
     Verify package availability (spack list findutils, apt search initscripts).
 
 
-Welcome to the Abyss
-You didn’t just run a script.
-You forged a pact.
-
-"The Void does not care. But it remembers."
-
-
-
 ## 🛡️ License & Commercial Use
 
 This project is **dual-licensed**:
@@ -142,3 +144,10 @@ Project name and branding are trademarked and may not be reused without permissi
 
 📧 Contact for commercial licensing: lordsodomiser@protonmail.com  
 💸 Support the project: https://ko-fi.com/lordsodomiser
+
+
+Welcome to the Abyss
+You didn’t just run a script.
+You forged a pact.
+
+"The Abyss does not care. But it remembers."

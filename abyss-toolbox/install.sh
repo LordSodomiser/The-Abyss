@@ -60,7 +60,7 @@ sleep 2
 echo ""
 
 read -rp "Run installation cleanup? [Y/n]: " confirm
-[[ "$confirm" =~ ^[Nn]$ ]] || rm -rf /tmp/abyss-0.0.5.tar.xz /opt/the-abyss/abyss-toolbox/initialize.sh /opt/the-abyss/abyss-toolbox/install.sh
+[[ "$confirm" =~ ^[Nn]$ ]] || rm -rf /tmp/abyss_toolbox-0.1.0.tar.xz /opt/The-Abyss/abyss-toolbox/initialize.sh /opt/The-Abyss/abyss-toolbox/install.sh
 
 sleep 1
 
