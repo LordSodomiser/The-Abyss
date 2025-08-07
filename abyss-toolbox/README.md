@@ -73,15 +73,16 @@ cd /tmp
 Download the Latest Release
 You can download and extract the latest .tar.gz release to /tmp using either wget or curl:
 Option 1: Using wget
-wget https://github.com/LordSodomiser/The-Abyss/releases/download/0.1.0/abyss_toolbox-0.1.0.tar.xz
+wget https://github.com/LordSodomiser/The-Abyss/releases/download/0.1.1/abyss-0.1.1.tar.xz
 
 Option 2: Using curl
-curl -LO https://github.com/LordSodomiser/The-Abyss/releases/download/0.1.0/abyss_toolbox-0.1.0.tar.xz
+curl -LO https://github.com/LordSodomiser/The-Abyss/releases/download/0.1.0/abyss-0.1.1.tar.xz
 
 1. Extract the Archive
 
-tar -xJvf abyss.tar.xz
+tar -xJvf abyss-0.1.1.tar.xz
 cd The-Abyss/abyss-toolbox
+chmod +x *.sh
 
 2. Initialize the Environment
 Prepares traps, detects your distro, ensures permissions, and lays the foundation.
@@ -96,8 +97,9 @@ Installs required packages, places toolbox into your $PATH, and offers to clean 
 4. Invoke the Abyss (Should you run the cleanup, the directory you inhabit (/tmp) will vanish. You’ll need to ‘cd’ to emerge from the void.)
 
 cystoolbox
+
 Or if you’re still shy:
-cd /opt/The-Abyss/abyss-toolbox/toolbox.sh
+/opt/The-Abyss/abyss-toolbox/toolbox.sh
 
 File Layout:
 

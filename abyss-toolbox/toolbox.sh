@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # The Abyss Sysadmin Toolbox
-# Copyright (c) 2025 Lord Sodomiser
+# Copyright (c) 2025 LordSodomiser
 # Licensed under the Mozilla Public License 2.0 or commercial license.
 # 
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -11,10 +11,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
+set -Eeuo pipefail
+
 if [[ $EUID -ne 0 ]]; then
 	echo "Root privileges are required to run this script."
-	read -rp "Do you want to run it with sudo now? [y/N]: " answer
-	if [[ "$answer" =~ ^[Yy]$ ]]; then
+	read -rp "Do you want to run it with sudo now? [Y/n]: " ans
+	ans=${ans:-Y}
+
+	if [[ "$ans" =~ ^([yY]|[Yy][Ee][Ss])$ ]]; then
 		exec sudo "$0" "$@"
 	else
 		echo "Exiting..."
