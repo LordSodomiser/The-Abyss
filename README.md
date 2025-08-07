@@ -4,13 +4,17 @@ A collection of Bash-based sysadmin tools for secure, efficient, and lightweight
 ## SHA512 Checksums
 
 Here are the SHA512 sums for important scripts in this repo:
-3bc38f46da45f5252eda117e305c015f9e778648c9ba71a434af34afa3ff27a6091291e86fdf73c7e9d62a8b0e395ead500ca2be1ddab8f68a5d3c20406768c0  ./abyss-toolbox/functions.sh
+2d29fdf3d2895e79814e85f7fcd41da34e6daa9f1cc6fdbedbcb44693f40bf6e988cd9360830360ddb241f03c29adb27091725e4d4380091d2d24f569e16a332  ./abyss-toolbox/functions.sh
 
-8bcf7cbbfc4995c02544f9d915a76de98b00e0b32add0428678f935518e92e2b1ad1b81986569098b0e819fbff57f66f7dcdc5656c348b99a53232cc059270a8  ./abyss-toolbox/initialize.sh
+1fcd6bbdf73090701eed42cf5bf189c01c238da5a89650a1d59474dd9c7009138467640d229828b76606a61760ed5043ee39cd94974b45a002da77a970d32a88  ./abyss-toolbox/initialize.sh
 
-1fbb2744a60212d6230e0ff32b8fe385962386736142eaa3971ed2bb572af601f6f573f2e73bbb61031ae30c3616ac7aae2645d843d5ffc210cd6821004fd1d2  ./abyss-toolbox/install.sh
+c079e1a1104baf4fd416b99d0d665f4aab0f1dfd518dc96a1bf9279320527dacedfdf550425cb2eeab1ab256462780e82442d19ab95329a3e0f452b9f3d7d318  ./abyss-toolbox/install.sh
 
-82d59caba0db7a1dcd98d5f38b8ac83ecf4cd6c49475f6bd21ea3562d6e32064f73f3f38ce653c8bf06cd60f643eb9aaa8ce5458b952c15287a08f9a3f70d2fb  ./abyss-toolbox/toolbox.sh
+db525f79ed89b4b640de54909e76a891c545167594c9b5bf44195e6d9e804839e3b45a4c73148f7c7b8a739fb6d2031b3a8421cd0acee54ed7cb72611ae64c6e  ./abyss-toolbox/toolbox.sh
+
+9c1e82b6f15e0ae8a16bf0a061725a38e38cd1f6b050e97612ebc15728d83bcd872fd803e13362e6fcc3f18e7ae82b6cd0736a41e10c8a7bbf672d95fac919a8  ./abyss-toolbox/uninstall.sh
+
+da8831ba460c053dd165543e6a3465d52f4fc915214dc402a5f31bd1938241e8dd39159aea57369bdfe9c841aa01a5dfb5547b302110145481798b8cd598cb9d  ./abyss-toolbox/update.sh
 
 ## Verifying Script Integrity
 
@@ -22,6 +26,7 @@ sha512sum --check CHECKSUM
 This command will compare the downloaded scripts against the expected SHA512 hashes listed in the CHECKSUM file and report if everything matches.
 
 Alternatively, use our provided verification script:
+chmod +x verify
 ./verify
 
 ## Quick Start
@@ -34,15 +39,16 @@ cd /tmp
 Download the Latest Release
 You can download and extract the latest .tar.gz release to /tmp using either wget or curl:
 Option 1: Using wget
-wget https://github.com/LordSodomiser/The-Abyss/releases/download/0.1.0/abyss_toolbox-0.1.0.tar.xz
+wget https://github.com/LordSodomiser/The-Abyss/releases/download/0.1.1/abyss-0.1.1.tar.xz
 
 Option 2: Using curl
-curl -LO https://github.com/LordSodomiser/The-Abyss/releases/download/0.1.0/abyss_toolbox-0.1.0.tar.xz
+curl -LO https://github.com/LordSodomiser/The-Abyss/releases/download/0.1.1/abyss-0.1.1.tar.xz
 
 1. Extract the Archive
 
-tar -xJvf abyss-0.1.0.tar.xz
+tar -xJvf abyss-0.1.1.tar.xz
 cd The-Abyss/abyss-toolbox
+chmod +x *.sh
 
 2. Initialize the Environment
 Prepares traps, detects your distro, ensures permissions, and lays the foundation.
@@ -57,8 +63,9 @@ Installs required packages, places toolbox into your $PATH, and offers to clean 
 4. Invoke the Abyss (Should you run the cleanup, the directory you inhabit (/tmp) will vanish. You’ll need to ‘cd’ to emerge from the void.)
 
 cystoolbox
+
 Or if you’re still shy:
-cd /opt/The-Abyss/abyss-toolbox/toolbox.sh
+/opt/The-Abyss/abyss-toolbox/toolbox.sh
 
 ## Support the Project
 
