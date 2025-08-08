@@ -253,7 +253,7 @@ disk_mgmt() {
 						echo ""
 						echo ""
 						echo "[$TOOLBOX_USER@$HOST]$ $cmd"
-						$cmd | tee -a "$LOG_FILE"
+						$cmd | tee -a "$LOG_FILE" || true
 						sleep 1
 						echo ""
 						echo ""
@@ -269,7 +269,7 @@ disk_mgmt() {
 					read -p "Do you have an existing SMB credential file? [y/N]: " ans
 					ans=${ans:-N}
 
-					if [[ "$ans" =~ ^[nN]$ ]];then
+					if [[ "$ans" =~ ^[nN]$ ]]; then
 
 					echo "Please create your credential file..."
 					read -p "Please enter your SMB share UID (default uid=${SUDO_UID:-$(id -u)}): " uid
@@ -322,9 +322,50 @@ EOF
 							echo "Missing credentials info. Skipping..."
 							sleep 2
 						fi
+					elif [[ "$ans" =~ ^[yY]$ ]]; then
+						read -p "Please enter the correct existing SMB credential file now: " ex_creds
+						if [[ -n "$ex_creds" && -f "$ex_creds" ]]; then
+							read -p "Please enter your SMB share UID (default uid=${SUDO_UID:-$(id -u)}): " uid
+							uid=${uid:-${SUDO_UID:-$(id -u)}}
+							read -p "Please enter your SMB share GID (default gid=${SUDI_GID:-$(id -g)}): " gid
+							gid=${gid:-${SUDO_GID:-$(id -g)}}
+							read -p "Enter SMB share path (e.g., //server/share): " smb_share
+							if [[ -n "$smb_share" && -d "$mount_target" ]]; then
+							cmd="mount -t cifs $smb_share $mount_target -o credentials=$ex_creds,uid=$uid,gid=$gid,rw,vers=3.0"
+							       log "$TOOLBOX_USER mounted SMB share using $cmd"
+							       echo ""
+							       echo "[$TOOLBOX_USER@$HOST]$ $cmd"
+							       $cmd
+							       sleep 1
+							       echo ""
+							       echo ""
+						
+							       read -p "Do you want to add this SMB mount to fstab? (y/N): " fstab
+							       if [[ "$fstab" =~ ^[yY]$ ]]; then
+								       entry="$smb_share $mount_target cifs credentials=$ex_creds,uid=$uid,gid=$gid,x-systemd.automount 0 0"
+								       echo "$entry" | tee -a /etc/fstab
+								       log "$TOOLBOX_USER added SMB mount to fstab"
+								       systemctl daemon-reload
+								       mount -a
+								       echo ""
+								       echo ""
+							       fi
+						       else
+							       echo "Invalid SMB share or mount point..."
+							       sleep 2
+							       echo ""
+							       echo""
+						       fi
+					       else
+						       echo "Invalid SMB share, mount point or credential file path..."
+						       sleep 2
+						       echo ""
+						       echo ""
+						       read -rp "Press enter to return..."
+						fi
 					fi
 				elif [[ "$mount_type" == "device" ]]; then
-			       		read -p "Enter device path (e.g., /dev/sda1, /dev/nvme0n1): " device
+				       	read -p "Enter device path (e.g., /dev/sda1, /dev/nvme0n1): " device
 					if [[ -b "$device" && -d "$mount_target" ]]; then
 						cmd="mount $device $mount_target"
 						log "$TOOLBOX_USER mounted drive using $cmd"
@@ -438,7 +479,7 @@ EOF
 				elif [[ "$mount_ans" == "unmount" ]]; then
 					read -p "Enter full path to unmount (e.g., /mnt/usb): " unmount_point
 					if [[ -d "$unmount_point" ]]; then
-						cmd="umount $unmount_point"
+						cmd="umount \"$unmount_point\""
 						log "$TOOLBOX_USER used '$cmd' to unmount $unmount_point"
 						echo ""
 						echo ""
@@ -460,61 +501,102 @@ EOF
 					ans=${ans:-N}
 
 					if [[ "$ans" =~ ^[nN]$ ]];then
+						echo "Please create your credential file..."
+						read -p "Please enter your SMB share UID (default uid=${SUDO_UID:-$(id -u)}): " uid
+						uid=${uid:-${SUDO_UID:-$(id -u)}}
 
-					echo "Please create your credential file..."
-					read -p "Please enter your SMB share UID (default uid=${SUDO_UID:-$(id -u)}): " uid
-					uid=${uid:-${SUDO_UID:-$(id -u)}}
+						read -p "Please enter your SMB share GID (default gid=${SUDO_GID:-$(id -g)}): " gid
+						gid=${SUDO_GID:-$(id -g)}
 
-					read -p "Please enter your SMB share GID (default gid=${SUDO_GID:-$(id -g)}): " gid
-					gid=${SUDO_GID:-$(id -g)}
+						read -p "Please enter your SMB share username: " username
+						read -p "Please enter your SMB share password: " password
+						read -p "Please enter your SMB share domain (optional): " domain
+						read -p "Where would you like to put the credentials file? (default /home/$TOOLBOX_USER/.smbcred): " smb_cred_loc
+						smb_cred_loc=${smb_cred_loc:-/home/$TOOLBOX_USER/.smbcred}
 
-					read -p "Please enter your SMB share username: " username
-					read -p "Please enter your SMB share password: " password
-					read -p "Please enter your SMB share domain (optional): " domain
-					read -p "Where would you like to put the credentials file? (default /home/$TOOLBOX_USER/.smbcred): " smb_cred_loc
-					smb_cred_loc=${smb_cred_loc:-/home/$TOOLBOX_USER/.smbcred}
-
-					if [[ -n "$username" && -n "$password" && -n "$smb_cred_loc" ]]; then
-						cat <<EOF | tee "$smb_cred_loc" > /dev/null
+						if [[ -n "$username" && -n "$password" && -n "$smb_cred_loc" ]]; then
+							cat <<EOF | tee "$smb_cred_loc" > /dev/null
 username=$username
 password=$password
 $( [[ -n "$domain" ]] && echo "domain=$domain" )
 EOF
-							chown $TOOLBOX_USER:$TOOLBOX_USER "$smb_cred_loc"
-							chmod 600 "$smb_cred_loc"
+								chown $TOOLBOX_USER:$TOOLBOX_USER "$smb_cred_loc"
+								chmod 600 "$smb_cred_loc"
 
-							read -p "Enter SMB share path (e.g., //server/share): " smb_share
-							if [[ -n "$smb_share" && -d "$mount_target" ]]; then
-								cmd="mount -t cifs $smb_share $mount_target -o credentials=$smb_cred_loc,uid=$uid,gid=$gid,rw,vers=3.0"
-								log "$TOOLBOX_USER mounted SMB share using $cmd"
-								echo ""
-								echo "[$TOOLBOX_USER@$HOST]$ $cmd"
-								$cmd
-								sleep 1
-								echo ""
-								echo ""
-
-								read -p "Do you want to add this SMB mount to fstab? (y/N): " fstab
-								if [[ "$fstab" =~ ^[yY]$ ]]; then
-									entry="$smb_share $mount_target cifs credentials=$smb_cred_loc,uid=$uid,gid=$gid,x-systemd.automount 0 0"
-									echo "$entry" | tee -a /etc/fstab
-									log "$TOOLBOX_USER added SMB mount to fstab"
-									systemctl daemon-reload
-									mount -a
+								read -p "Enter SMB share path (e.g., //server/share): " smb_share
+								if [[ -n "$smb_share" && -d "$mount_target" ]]; then
+									cmd="mount -t cifs $smb_share $mount_target -o credentials=$smb_cred_loc,uid=$uid,gid=$gid,rw,vers=3.0"
+									log "$TOOLBOX_USER mounted SMB share using $cmd"
+									echo ""
+									echo "[$TOOLBOX_USER@$HOST]$ $cmd"
+									$cmd
+									sleep 1
 									echo ""
 									echo ""
+
+									read -p "Do you want to add this SMB mount to fstab? (y/N): " fstab
+									if [[ "$fstab" =~ ^[yY]$ ]]; then
+										entry="$smb_share $mount_target cifs credentials=$smb_cred_loc,uid=$uid,gid=$gid,x-systemd.automount 0 0"
+										echo "$entry" | tee -a /etc/fstab
+										log "$TOOLBOX_USER added SMB mount to fstab"
+										systemctl daemon-reload
+										mount -a
+										echo ""
+										echo ""
+									fi
+								else
+									echo "Invalid SMB share or mount point..."
+									sleep 2
 								fi
 							else
-								echo "Invalid SMB share or mount point..."
+								echo "Missing credentials info. Skipping..."
 								sleep 2
 							fi
-						else
-							echo "Missing credentials info. Skipping..."
-							sleep 2
-						fi
+						elif [[ "$ans" =~ ^[yY]$ ]]; then
+							read -p "Please enter the correct existing SMB credential file now: " ex_creds
+							if [[ -n "$ex_creds" && -f "$ex_creds" ]]; then
+								read -p "Please enter your SMB share UID (default uid=${SUDO_UID:-$(id -u)}): " uid
+								uid=${uid:-${SUDO_UID:-$(id -u)}}
+								read -p "Please enter your SMB share GID (default gid=${SUDO_GID:-$(id -g)}): " gid
+								gid=${gid:-${SUDO_GID:-$_id -g)}}
+								read -p "Enter SMB share path (e.g., //server/share): " smb_share
+								if [[ -n "$smb_share" && -d "$mount_target" ]]; then
+									cmd="mount -t cifs $smb_share $mount_target -o credentials=$ex_creds,uid=$uid,gid=$gid,rw,vers=3.0"
+									log "$TOOLBOX_USER mounted SMB share using $cmd"
+									echo ""
+									echo "[$TOOLBOX_USER@$HOST]$ $cmd"
+									$cmd
+									sleep 1
+									echo ""
+									echo ""
+									
+									read -p "Do you want to add this SMB mount to /etc/fstab? (y/N): " fstab
+									if [[ "$fstab" =~ ^[yY]$ ]]; then
+										entry="$smb_share $mount_target cifs credentials=$ex_creds,uid=$uid,gid=$gid,x-systemd.automount 0 0"
+										echo "$entry" | tee -a /etc/fstab
+										log "$TOOLBOX_USER added SMB mount to fstab"
+										systemctl daemon-reload
+										mount -a
+										echo ""
+										echo ""
+									fi
+								else
+									echo "Invalid SMB share or mount point..."
+									sleep 2
+									echo ""
+									echo ""
+									read -rp "Press enter to return..."
+								fi
+							else
+								echo "Invalid SMB share, mount point, or credential file path..."
+								sleep 2
+								echo ""
+								echo ""
+								read -rp "Press enter to return..."
+							fi
 					fi
 				elif [[ "$mount_type" == "device" ]]; then
-			       		read -p "Enter device path (e.g., /dev/sda1, /dev/nvme0n1): " device
+					read -p "Enter device path (e.g., /dev/sda1, /dev/nvme0n1): " device
 					if [[ -b "$device" && -d "$mount_target" ]]; then
 						cmd="mount $device $mount_target"
 						log "$TOOLBOX_USER mounted drive using $cmd"
@@ -564,13 +646,15 @@ EOF
 						echo ""
 						echo ""
 						echo "[$TOOLBOX_USER@$HOST]$ $cmd"
-						$cmd | tee -a "$LOG_FILE"
+						$cmd | tee -a "$LOG_FILE" || true
 						sleep 1
 						echo ""
 						echo ""
 					else
 						echo "Invalid or non-existent path..."
 						sleep 2
+						echo ""
+						echo ""
 					fi
 				fi
 				echo ""

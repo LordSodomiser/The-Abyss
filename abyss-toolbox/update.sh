@@ -31,8 +31,8 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 ENV_FILE="/opt/The-Abyss/abyss-toolbox/.configs/.env"
-SRC_DIR=\"$(cd "$(dirname "$0")" && pwd)\"
-DEST_DIR=\"/opt/The-Abyss/abyss-toolbox\"
+SRC_DIR=$(cd "$(dirname "$0")" && pwd)
+DEST_DIR=/opt/The-Abyss/abyss-toolbox
 
 if [[ ! -f "$ENV_FILE" ]]; then
 	echo "Error: .env file not found at $ENV_FILE"
@@ -61,7 +61,7 @@ fi
 source "$ENV_FILE"
 
 sed -i "/^SRC_DIR=/d" "$ENV_FILE"
-echo "SRC_DIR=\"$(cd "$(dirname "$0")" && pwd)\"" >> "$ENV_FILE"
+echo "SRC_DIR=\"$SRC_DIR\"" >> "$ENV_FILE"
 
 if ! grep -q "^DEST_DIR=" "$ENV_FILE"; then
 	echo "DEST_DIR=\"/opt/The-Abyss/abyss-toolbox\"" >> "$ENV_FILE"

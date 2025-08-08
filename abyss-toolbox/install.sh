@@ -31,6 +31,8 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 ENV_FILE=".configs/.env"
+SRC_DIR=$(cd "$(dirname "$0")" && pwd)
+DEST_DIR=/opt/The-Abyss/abyss-toolbox
 
 if [[ ! -f "$ENV_FILE" ]]; then
 	echo "Error: .env file not found at $ENV_FILE"
@@ -40,6 +42,26 @@ source "$ENV_FILE"
 
 if ! grep -q "^HOST=" "$ENV_FILE"; then
 	echo "HOST=$(hostname)" >> "$ENV_FILE"
+fi
+
+if ! grep -q "^DEST_DIR=" "$ENV_FILE"; then
+	echo "DEST_DIR=\"/opt/The-Abyss/abyss-toolbox\"" >> "$ENV_FILE"
+fi
+
+if ! grep -q "^SRC_TOOLBOX=" "$ENV_FILE"; then
+	echo "SRC_TOOLBOX=\"$SRC_DIR/toolbox.sh\"" >> "$ENV_FILE"
+fi
+
+if ! grep -q "^SRC_FUNCTIONS=" "$ENV_FILE"; then
+	echo "SRC_FUNCTIONS=\"$SRC_DIR/functions.sh\"" >> "$ENV_FILE"
+fi
+
+if ! grep -q "^DEST_TOOLBOX=" "$ENV_FILE"; then
+	echo "DEST_TOOLBOX=\"$DEST_DIR/toolbox.sh\"" >> "$ENV_FILE"
+fi
+
+if ! grep -q "^DEST_FUNCTIONS=" "$ENV_FILE"; then
+	echo "DEST_FUNCTIONS=\"$DEST_DIR/functions.sh\"" >> "$ENV_FILE"
 fi
 
 if ! source "$ENV_FILE"; then
