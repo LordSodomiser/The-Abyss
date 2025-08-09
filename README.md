@@ -1,76 +1,116 @@
 # The-Abyss
-A collection of Bash-based sysadmin tools for secure, efficient, and lightweight system management.
+
+A lightweight, Bash-based sysadmin toolbox for secure and efficient management of headless Linux servers. Designed for simplicity and zero dependencies, The-Abyss provides tools like TUI .onion Site Manager, Modular Dotfile Manager, and Offline Encrypted Vault Generator to streamline server administration.
+
+## Features
+
+- **Lightweight**: Zero-dependency Bash scripts for minimal footprint.
+- **Secure**: Tools for one-click server hardening and encrypted vault creation.
+- **Flexible**: Modular design with more utilities in future releases.
+- **Portable**: Runs on most Linux distributions with distro detection.
 
 ## SHA512 Checksums
 
-Here are the SHA512 sums for all scripts in this repo:
-428d8c2e5a57a6659048c15e6b993990f3a2eece0a2a8a418b1e60adb27534f05553a9e4e729c2ef8e165927726849a70f557fe8a9a1c6628b7ac4b34996a8ba  ./abyss-toolbox/functions.sh
+Verify the integrity of downloaded scripts with these SHA512 checksums:
 
-1fcd6bbdf73090701eed42cf5bf189c01c238da5a89650a1d59474dd9c7009138467640d229828b76606a61760ed5043ee39cd94974b45a002da77a970d32a88  ./abyss-toolbox/initialize.sh
+```
+428d8c2e5a57a6659048c15e6b993990f3a2eece0a2a8a418b1e60adb27534f05553a9e4e729c2ef8e165927726849a70f557fe8a9a1c6628b7ac4b34996a8ba ./abyss-toolbox/functions.sh
+1fcd6bbdf73090701eed42cf5bf189c01c238da5a89650a1d59474dd9c7009138467640d229828b76606a61760ed5043ee39cd94974b45a002da77a970d32a88 ./abyss-toolbox/initialize.sh
+865272cd4e03a3312fa762a4629a443454596493b3421b3c9d7789743f6f6c119d9a3a91ad2a0151906d74d02adc558adada948cdd51b9a62ef2c06715720969 ./abyss-toolbox/install.sh
+db525f79ed89b4b640de54909e76a891c545167594c9b5bf44195e6d9e804839e3b45a4c73148f7c7b8a739fb6d2031b3a8421cd0acee54ed7cb72611ae64c6e ./abyss-toolbox/toolbox.sh
+9c1e82b6f15e0ae8a16bf0a061725a38e38cd1f6b050e97612ebc15728d83bcd872fd803e13362e6fcc3f18e7ae82b6cd0736a41e10c8a7bbf672d95fac919a8 ./abyss-toolbox/uninstall.sh
+6b7cc009ffcf3fabba6528977b0368f05a2054ba0331ea79410be1ce8611a4c75477b224ece4ec8bb14b87b866f0ce298d19f5a18cc587fcb0dae8c351e07476 ./abyss-toolbox/update.sh
+```
 
-865272cd4e03a3312fa762a4629a443454596493b3421b3c9d7789743f6f6c119d9a3a91ad2a0151906d74d02adc558adada948cdd51b9a62ef2c06715720969  ./abyss-toolbox/install.sh
+### Verifying Script Integrity
 
-db525f79ed89b4b640de54909e76a891c545167594c9b5bf44195e6d9e804839e3b45a4c73148f7c7b8a739fb6d2031b3a8421cd0acee54ed7cb72611ae64c6e  ./abyss-toolbox/toolbox.sh
-
-9c1e82b6f15e0ae8a16bf0a061725a38e38cd1f6b050e97612ebc15728d83bcd872fd803e13362e6fcc3f18e7ae82b6cd0736a41e10c8a7bbf672d95fac919a8  ./abyss-toolbox/uninstall.sh
-
-6b7cc009ffcf3fabba6528977b0368f05a2054ba0331ea79410be1ce8611a4c75477b224ece4ec8bb14b87b866f0ce298d19f5a18cc587fcb0dae8c351e07476  ./abyss-toolbox/update.sh
-
-
-
-## Verifying Script Integrity
-
-To verify that the scripts you downloaded haven't been tampered with, you can run:
+To ensure scripts haven't been tampered with, run:
 
 ```bash
 sha512sum --check CHECKSUM
+```
 
-This command will compare the downloaded scripts against the expected SHA512 hashes listed in the CHECKSUM file and report if everything matches.
+This compares downloaded scripts against the listed SHA512 hashes. Alternatively, use the provided verification script:
 
-Alternatively, use our provided verification script:
+```bash
 chmod +x verify
 ./verify
+```
 
 ## Quick Start
 
-> **Step into `/tmp` or be consumed.**
-```bash
-# (If you're not already in /tmp)
-cd /tmp
+> **Step into `/tmp` or be consumed by the void.**
 
-Download the Latest Release
-You can download and extract the latest .tar.gz release to /tmp using either wget or curl:
-Option 1: Using wget
-wget https://github.com/LordSodomiser/The-Abyss/releases/download/0.1.1/abyss-0.1.1.tar.xz
+1. **Download the Latest Release**
 
-Option 2: Using curl
-curl -LO https://github.com/LordSodomiser/The-Abyss/releases/download/0.1.1/abyss-0.1.1.tar.xz
+   Navigate to `/tmp` to avoid cluttering your system:
 
-1. Extract the Archive
+   ```bash
+   cd /tmp
+   ```
 
-tar -xJvf abyss-0.1.1.tar.xz
-cd The-Abyss/abyss-toolbox
-chmod +x *.sh
+   Download and extract the latest release (v0.1.1):
 
-2. Initialize the Environment
-Prepares traps, detects your distro, ensures permissions, and lays the foundation.
+   - **Using wget**:
+     ```bash
+     wget https://github.com/LordSodomiser/The-Abyss/releases/download/0.1.1/abyss-0.1.1.tar.xz
+     ```
 
-./initialize.sh
+   - **Using curl**:
+     ```bash
+     curl -LO https://github.com/LordSodomiser/The-Abyss/releases/download/0.1.1/abyss-0.1.1.tar.xz
+     ```
 
-3. Install the Toolbox
-Installs required packages, places toolbox into your $PATH, and offers to clean up.
+2. **Extract and Prepare**
 
-./install.sh
+   ```bash
+   tar -xJvf abyss-0.1.1.tar.xz
+   cd The-Abyss/abyss-toolbox
+   chmod +x *.sh
+   ```
 
-4. Invoke the Abyss (Should you run the cleanup, the directory you inhabit (/tmp) will vanish. You’ll need to ‘cd’ to emerge from the void.)
+3. **Initialize the Environment**
 
-cystoolbox
+   Sets up traps, detects your distro, and ensures proper permissions:
 
-Or if you’re still shy:
-/opt/The-Abyss/abyss-toolbox/toolbox.sh
+   ```bash
+   ./initialize.sh
+   ```
+
+4. **Install the Toolbox**
+
+   Installs dependencies, adds The-Abyss to your `$PATH`, and offers cleanup:
+
+   ```bash
+   ./install.sh
+   ```
+
+5. **Invoke the Abyss**
+
+   Run the toolbox:
+
+   ```bash
+   cystoolbox
+   ```
+
+   Or, if you prefer the full path:
+
+   ```bash
+   /opt/The-Abyss/abyss-toolbox/toolbox.sh
+   ```
+
+   > **Note**: If you ran cleanup, the `/tmp/The-Abyss` directory is removed. Use `cd` to navigate to a new directory.
+
+## Contributing
+
+We welcome contributions! Check out our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on reporting bugs, suggesting features, or submitting pull requests. Testers are especially needed to help squash minor bugs—join the effort!
 
 ## Support the Project
 
-If this project helped you, consider donating:
+If The-Abyss saves you time, consider supporting its development:
 
-https://ko-fi.com/lordsodomiser
+[Donate via Ko-fi](https://ko-fi.com/lordsodomiser)
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
