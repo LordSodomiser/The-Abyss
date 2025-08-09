@@ -99,11 +99,15 @@ chmod +x verify
    /opt/The-Abyss/abyss-toolbox/toolbox.sh
    ```
 
-   > **Note**: If you ran cleanup, the `/tmp` directory is removed. Use `cd` to navigate to a new directory.
+   > **Note**: If you ran cleanup, the `/tmp/The-Abyss` directory is removed. Use `cd` to navigate to a new directory.
 
 ## Contributing
 
 We welcome contributions! Check out our [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on reporting bugs, suggesting features, or submitting pull requests. Testers are especially needed to help squash minor bugs—join the effort!
+
+## Contact
+Created and Maintained By
+LordSodomiser (Into the Abyss) <lordsodomiser@proton.me>
 
 ## Support the Project
 
