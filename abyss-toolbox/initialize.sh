@@ -323,6 +323,15 @@ for pkg_mgr in apk apt conda dnf emerge nix-env pacman pkg pkgin pkg_add slackpk
 		echo "Missing tools: ${missing_tools[*]}"
 		prompt_confirm
 		unique_packages=($(echo "${missing_packages[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
+		
+		if [[ $pkg_mgr == "dnf" || $pkg_mgr == "yum" ]]; then
+			$pkg_mgr install -y epel-release
+			sleep 1
+			$pkg_mgr install -y clamd clamav-update
+		else
+			echo "Error: $pkg_mgr not found"
+			exit 1
+		fi
 
 		for pkg in "${unique_packages[@]}"; do
 			echo "Installing $pkg..."
