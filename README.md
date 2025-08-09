@@ -51,6 +51,11 @@ chmod +x verify
 
    Download and extract the latest release (v0.1.1):
 
+   - **Using git clone**:
+     ```bash
+     git clone https://github.com/LordSodomiser/The-Abyss.git
+     ```
+
    - **Using wget**:
      ```bash
      wget https://github.com/LordSodomiser/The-Abyss/releases/download/0.1.1/abyss-0.1.1.tar.xz
@@ -60,8 +65,8 @@ chmod +x verify
      ```bash
      curl -LO https://github.com/LordSodomiser/The-Abyss/releases/download/0.1.1/abyss-0.1.1.tar.xz
      ```
-
-2. **Extract and Prepare**
+     
+3. **Extract and Prepare**
 
    ```bash
    tar -xJvf abyss-0.1.1.tar.xz
@@ -69,7 +74,7 @@ chmod +x verify
    chmod +x *.sh
    ```
 
-3. **Initialize the Environment**
+4. **Initialize the Environment**
 
    Sets up traps, detects your distro, and ensures proper permissions:
 
@@ -77,7 +82,7 @@ chmod +x verify
    ./initialize.sh
    ```
 
-4. **Install the Toolbox**
+5. **Install the Toolbox**
 
    Installs dependencies, adds The-Abyss to your `$PATH`, and offers cleanup:
 
@@ -85,7 +90,7 @@ chmod +x verify
    ./install.sh
    ```
 
-5. **Invoke the Abyss**
+6. **Invoke the Abyss**
 
    Run the toolbox:
 
