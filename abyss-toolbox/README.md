@@ -155,6 +155,7 @@ chmod +x verify
 
 ```
 The-Abyss/
+├── CHECKSUM             # sha512sum file for available scripts
 ├── verify               # Script integrity checker
 ├── abyss-toolbox/
 │   ├── toolbox.sh       # Main entrypoint
