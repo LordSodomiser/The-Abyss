@@ -66,7 +66,7 @@ chmod +x verify
      curl -LO https://github.com/LordSodomiser/The-Abyss/releases/download/0.1.1/abyss-0.1.1.tar.xz
      ```
      
-3. **Extract and Prepare**
+3. **Extract and Prepare (if using tarbar)**
 
    ```bash
    tar -xJvf abyss-0.1.1.tar.xz
