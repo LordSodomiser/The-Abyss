@@ -1,13 +1,13 @@
 # The-Abyss
 
-A lightweight, Bash-based sysadmin toolbox for secure and efficient management of headless Linux servers. Designed for simplicity and zero dependencies, The-Abyss provides tools like TUI .onion Site Manager, Modular Dotfile Manager, and Offline Encrypted Vault Generator to streamline server administration.
+A lightweight, Bash-based sysadmin toolbox for secure and efficient management of headless Linux servers. Designed for simplicity and zero dependencies, The-Abyss Sysadmin Toolbox streamlines server administration with essential utilities. Future expansions include tools like Modular Dotfile Manager, TUI .onion Site Manager, and Offline Encrypted Vault Generator.
 
 ## Features
 
 - **Lightweight**: Zero-dependency Bash scripts for minimal footprint.
-- **Secure**: Tools for one-click server hardening and encrypted vault creation.
-- **Flexible**: Modular design with more utilities in future releases.
+- **Secure**: Focus on secure system management practices.
 - **Portable**: Runs on most Linux distributions with distro detection.
+- **Evolving**: Core toolbox is functional; additional modules in development.
 
 ## SHA512 Checksums
 
@@ -99,7 +99,7 @@ chmod +x verify
    /opt/The-Abyss/abyss-toolbox/toolbox.sh
    ```
 
-   > **Note**: If you ran cleanup, the `/tmp/The-Abyss` directory is removed. Use `cd` to navigate to a new directory.
+   > **Note**: If you ran cleanup, the `/tmp` directory is removed. Use `cd` to navigate to a new directory.
 
 ## Contributing
 
