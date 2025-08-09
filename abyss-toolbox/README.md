@@ -181,6 +181,10 @@ The-Abyss uses [junegunn/fzf](https://github.com/junegunn/fzf) (MIT License), in
 - `sudo` in `spack` may need manual configuration.
 - Verify package availability (e.g., `spack list findutils`, `apt search initscripts`).
 
+## Updating
+
+When a new release arrives, follow the same process as for the initial installation, but run ./update.sh instead of ./install.sh.
+
 ## Contributing
 
 We need testers to squash bugs and refine the toolbox! Check [CONTRIBUTING.md](CONTRIBUTING.md) for how to report issues, suggest features, or submit code. Your feedback shapes the Abyss.
