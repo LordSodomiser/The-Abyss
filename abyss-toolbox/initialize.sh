@@ -286,8 +286,6 @@ for pkg_mgr in apk apt conda dnf emerge nix-env pacman pkg pkgin pkg_add slackpk
 		for tool in "${required_tools[@]}"; do
 			if [[ "$tool" == "cifs" ]]; then
 				if mount --help | grep -q "cifs" || modinfo cifs >/dev/null 2>&1; then
-					echo "CIFS support is installed"
-				else
 					echo "CIFS support is not installed"
 					missing_tools+=("$tool")
 					missing_packages+=("${tool_to_package[$tool]}")
@@ -328,20 +326,28 @@ for pkg_mgr in apk apt conda dnf emerge nix-env pacman pkg pkgin pkg_add slackpk
 			$pkg_mgr install -y epel-release
 			sleep 1
 			$pkg_mgr install -y clamd clamav-update
+			
+			for pkg in "${unique_packages[@]}"; do
+				echo "Installing $pkg..."
+				$pkg_install "$pkg"
+				pkg_log
+			done
+
+			if [ ${#installed_pkgs[@]} -gt 0 ]; then
+				: > "$LOG_INSTALLED_PKGS"
+				echo "${installed_pkgs[*]}" >> "$LOG_INSTALLED_PKGS"
+			fi
 		else
-			echo "Error: $pkg_mgr not found"
-			exit 1
-		fi
+			for pkg in "${unique_packages[@]}"; do
+				echo "Installing $pkg..."
+				$pkg_install "$pkg"
+				pkg_log
+			done
 
-		for pkg in "${unique_packages[@]}"; do
-			echo "Installing $pkg..."
-			$pkg_install "$pkg"
-			pkg_log
-		done
-
-		if [ ${#installed_pkgs[@]} -gt 0 ]; then
-			: > "$LOG_INSTALLED_PKGS"
-			echo "${installed_pkgs[*]}" >> "$LOG_INSTALLED_PKGS"
+			if [ ${#installed_pkgs[@]} -gt 0 ]; then
+				: > "$LOG_INSTALLED_PKGS"
+				echo "${installed_pkgs[*]}" >> "$LOG_INSTALLED_PKGS"
+			fi
 		fi
 
 		
