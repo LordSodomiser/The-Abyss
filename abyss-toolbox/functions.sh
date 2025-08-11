@@ -1329,7 +1329,7 @@ net_diag() {
 # Security Management Submenu
 sec_mgmt() {
 	while true; do
-		choice=$(echo -e "Back\nSystem Update\nShow Last Logins\nShow Active Users\nRootkit Check\nShow Firewall Status\nDeny Traffic\nAllow Traffic\nAntivirus Scan" | fzf)
+		choice=$(echo -e "Back\nSystem Update\nRootkit Check\nShow Firewall Status\nDeny Traffic\nAllow Traffic\nAntivirus Scan\nUser Management\nGroup Management\nAccount Info & Listing" | fzf)
        
 		if [[ -z "$choice" ]]; then
 			echo "No selection made. Returning to main menu..."
@@ -1557,17 +1557,441 @@ sec_mgmt() {
 						;;
 				esac
 				;;
-			"Show Active Users")
-				cmd="who"
-				log "$TOOLBOX_USER viewed active users using '$cmd'"
-				echo "[$TOOLBOX_USER@$HOST]$ $cmd"
-				echo ""
-				echo ""
-				$cmd | tee -a "$LOG_FILE"
-				sleep 1
-				echo ""
-				echo ""
-				read -rp "Press enter to return..."
+			"User Management")
+				usr_mgmt=$(echo -e "Back\nLock/Unlock User Account\nDelete User\nCreate New User\nChange User Password" | fzf)
+				if [[ -z "$usr_mgmt" ]]; then
+					echo "No choice selected. Returning..."
+					sleep 2
+					continue
+				fi
+
+				case "$usr_mgmt" in
+					"Change User Password")
+						log "$TOOLBOX_USER listed users using 'awk -F: '\''\$3 >= 1000 && \$1 != \"nobody\" {print \$1}'\'' /etc/passwd'"
+						echo ""
+						echo ""
+						echo "Listing user accounts..."
+						sleep 1
+						echo "[$TOOLBOX_USER@$HOST]$ awk -F: '\$3 >= 1000 && \$1 != \"nobody\" {print \$1}' /etc/passwd"
+						echo ""
+						awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd
+						read -rp "Please enter the username to create password: " user
+
+						if [[ -n "$user" ]]; then
+							cmd2="passwd $user"
+							echo "[$TOOLBOX_USER@$HOST]$ $cmd2"
+							$cmd2
+							log "$TOOLBOX_USER changed the password for $user using $cmd2"
+						else
+							echo "No chosen user..."
+							echo ""
+							echo ""
+						fi
+						read -rp "Press enter to return..."
+						;;
+					"Create New User")
+						read -rp "Please enter a username: " username
+						read -rp "Create a home directory? [Y/n]: " home
+						read -rp "Shell (default: /bin/bash]: " shell
+						read -rp "Add to sudo group? [y/N]: " sudo
+
+						home=${home:-Y}
+						shell=${shell:-/bin/bash}
+						sudo=${sudo:-N}
+						home=${home,,}
+						sudo=${sudo,,}
+
+						if getent group sudo >/dev/null; then
+							SUDO_GROUP="sudo"
+						else
+							SUDO_GROUP="wheel"
+						fi
+
+						if [[ -z "$username" ]]; then
+							echo "No username entered. Returning..."
+							break
+						fi
+
+						if [[ "$home" == "y" ]]; then
+							HOME_FLAG="-m"
+						else
+							HOME_FLAG="-M"
+						fi
+
+						if [[ "$sudo" == "y" ]]; then
+							GROUP_FLAG="-G $SUDO_GROUP"
+						else
+							GROUP_FLAG=""
+						fi
+						
+						cmd="useradd $HOME_FLAG $GROUP_FLAG -s $shell $username"
+						echo "[$TOOLBOX_USER@$HOST]$ $cmd"
+						$cmd | tee -a "$LOG_FILE"
+						log "$TOOLBOX_USER created user '$username' with shell $shell, home=$home, sudo=$sudo"
+						echo ""
+						echo ""
+
+						read -rp "Add password for new user? [Y/n] " pass
+						pass=${pass:-Y}
+						passa=${pass,,}
+
+						if [[ "$pass" == "y" ]]; then
+							while true; do
+								if passwd "$username" | tee -a "$LOG_FILE"; then
+									break
+								else
+									echo "Passwords do not match or an error occurred. Please try again."
+								fi
+							done
+						fi
+
+						read -rp "Press enter to return..."
+						;;
+					"Delete User")
+						log "$TOOLBOX_USER listed users using 'awk -F: '\''\$3 >= 1000 && \$1 != \"nobody\" {print \$1}'\'' /etc/passwd'"
+						echo ""
+						echo ""
+						echo -e "\nListing user accounts..."
+						sleep 1
+						echo "[$TOOLBOX_USER@$HOST]$ awk -F: '\$3 >= 1000 && \$1 != \"nobody\" {print \$1}' /etc/passwd"
+						echo ""
+						awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd
+
+						read -rp "Please enter the user you wish to delete: " user
+						[[ -z "$user" ]] && echo "No username entered. Returning..." && break
+
+						if ! id "$user" &>/dev/null; then
+							echo "Error: User '$user' does not exist."
+							read -rp "Press enter to return..."
+							break
+						fi
+
+						uid=$(id -u "$user")
+						if (( uid < 1000 )); then
+							echo "Error: Cannot delete system account ($user, UID $uid)."
+							read -rp " Press enter to return..."
+							break
+						fi
+
+						read -rp "Do you want to remove this users home dir & mail spool? [Y/n] " ans
+						ans=${ans:-Y}
+						ans=${ans,,}
+
+						read -rp "Are you sure you want to delete '$user'? This cannot be undone. [y/N]: " confirm
+						confirm=${confirm,,}
+						[[ "$confirm" != "y" ]] && echo "Cancelled." && break
+
+						if [[ "$ans" =~ ^[yY]$ ]]; then
+							cmd="userdel -r $user"
+							echo "[$TOOLBOX_USER@$HOST]$ $cmd"
+							$cmd | tee -a "$LOG_FILE"
+							log "$TOOLBOX_USER deleted $user along with the home dir & mail spool"
+							echo ""
+							echo ""
+						else
+							cmd="userdel $user"
+							echo "[$TOOLBOX_USER@$HOST]$ $cmd"
+							$cmd | tee -a "$LOG_FILE"
+							log "$TOOLBOX_USER deleted $user"
+							echo ""
+							echo ""
+						fi
+						
+						read -rp "Press enter to return..."
+						;;
+					"Lock/Unlock User Account")
+						log "$TOOLBOX_USER listed users using 'awk -F: '\''\$3 >= 1000 && \$1 != \"nobody\" {print \$1}'\'' /etc/passwd'"
+						echo ""
+						echo ""
+						echo -e "\nListing user accounts..."
+						sleep 1
+						echo "[$TOOLBOX_USER@$HOST]$ awk -F: '\$3 >= 1000 && \$1 != \"nobody\" {print \$1}' /etc/passwd"
+						echo ""
+						awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd
+						echo ""
+						echo ""
+
+						read -rp "Please enter the username for the account you wish to lock/unlock: " username
+						[[ -z "$username" ]] && echo "No username entered. Returning..." && break
+
+						if ! id "$username" &>/dev/null; then
+							echo "Error: User '$username' does not exist."
+							read -rp "Press ender to return..."
+							break
+						fi
+						
+						uid=$(id -u "$username")
+						if (( uid < 1000 )); then
+							echo "Error: Cannot modify system account ($username, UID $uid)."
+							read -rp "Press enter to return..."
+							break
+						fi
+
+						read -rp "Would you like to lock or unlock a user account? [lock/unlock]: " ans
+						ans=${ans,,}
+
+						case "$ans" in
+							lock)
+								echo "[$TOOLBOX_USER@$HOST]$ usermod -L $username"
+								if usermod -L "$username" | tee -a "$LOG_FILE"; then
+									log "$TOOLBOX_USER locked the account for $username"
+									echo ""
+									echo ""
+								fi
+								;;
+							unlock)
+								echo "[$TOOLBOX_USER@$HOST]$ usermod -U $username"
+								if usermod -U "$username" | tee -a "$LOG_FILE"; then
+									log "$TOOLBOX_USER unlocked the account for $username"
+									echo ""
+									echo ""
+								fi
+								;;
+							*)
+								echo "Invalid choice. Returning..."
+								;;
+						esac
+
+						read -rp "Press enter to return..."
+						;;
+					"Back")
+						continue
+				esac
+				;;
+			"Group Management")
+				grp_mgmt=$(echo -e "Back\nDelete Group\nCreate Group\nAdd/Remove User from Group" | fzf)
+				if [[ -z "$grp_mgmt" ]]; then
+					echo "No choice selected. Returning..."
+					sleep 2
+					continue
+				fi
+
+				case $grp_mgmt in
+					"Add/Remove User from Group")
+						cmd="cut -d: -f1 /etc/group"
+						log "$TOOLBOX_USER listed users using 'awk -F: '\''\$3 >= 1000 && \$1 != \"nobody\" {print \$1}'\'' /etc/passwd'"
+						echo ""
+						echo ""
+						echo -e "\nListing user accounts..."
+						sleep 1
+						echo "[$TOOLBOX_USER@$HOST]$ awk -F: '\$3 >= 1000 && \$1 != \"nobody\" {print \$1}' /etc/passwd"
+						echo ""
+						awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd
+						echo ""
+						echo ""
+						log "$TOOLBOX_USER listed groups using '$cmd2"
+						echo ""
+						echo ""
+						echo -e "\nListing groups"
+						sleep 1
+						echo "[$TOOLBOX_USER@$HOST]$ $cmd"
+						eval "$cmd"
+						echo ""
+						echo ""
+
+						read -rp "Please enter the username to modify: " username
+						[[ -z "$username" ]] && echo "Invalid username. Returning..." && break
+						if ! id "$username" &>/dev/null; then
+							echo "Error: User '$username' does not exist."
+							read -rp "Press ender to return..."
+							break
+						fi
+						uid=$(id -u "$username")
+						if (( uid < 1000 )); then
+							echo "Error: Cannot modify system account ($username, UID $uid)."
+							read -rp "Press enter to return..."
+							break
+						fi
+						
+						read -rp "Please enter the group name: " group
+						[[ -z "$group" ]] && echo "No group name entered. Returning..." && break
+
+						if ! getent group "$group" &>/dev/null; then
+							echo "Error: Group '$group' does not exist."
+							read -rp "Press enter to return..."
+							break
+						fi
+						
+						read -rp "Would you like to add or remove a user from the group? [add/remove]: " ans
+						ans=${ans,,}
+
+						case "$ans" in
+							add)
+								echo "[$TOOLBOX_USER@$HOST]$ usermod -aG $group $username"
+								if usermod -aG "$group" "$username" | tee -a "$LOG_FILE"; then
+									log "$TOOLBOX_USER added $username to the $group group"
+									echo ""
+									echo ""
+								fi
+								;;
+							remove)
+								current_groups=$(id -nG "$username" | tr ' ' '\n' | grep -vx "$group" | tr '\n' ',' | sed 's/,$//')
+								echo "[$TOOLBOX_USER@$HOST]$ usermod -G $current_groups $username"
+								if usermod -G "$current_groups" "$username" | tee -a "$LOG_FILE"; then
+									log "$TOOLBOX_USER removed $username from the $group group"
+									echo ""
+									echo ""
+								fi
+								;;
+							*)
+								echo "Invalid choice. Returning..."
+								;;
+						esac
+						read -rp "Press enter to return..."
+						;;
+					"Create Group")
+						read -rp "Enter new group name: " groupname
+						[[ -z "$groupname" ]] && echo "No group name entered. Returning..." && break
+						read -rp "Create with specific GID? (e.g., 1050) [y/N]: " ans
+						ans=${ans:-N}
+						ans=${ans,,}
+
+						if [[ "$ans" == "y" ]]; then
+							read -rp "Enter GID: " gid
+							[[ -z "$gid" ]] && echo "No GID entered. Returning..." && break
+							cmd="groupadd -g $gid $groupname"
+							echo "[$TOOLBOX_USER@$HOST]$ $cmd"
+							$cmd | tee -a "$LOG_FILE"
+							log "$TOOLBOX_USER created the group $groupname with specified GID: $gid"
+							echo ""
+							echo ""
+						else
+							cmd="groupadd $groupname"
+							echo "[$TOOLBOX_USER@$HOST]$ $cmd"
+							$cmd | tee -a "$LOG_FILE"
+							log "$TOOLBOX_USER created group $groupname."
+							echo ""
+							echo ""
+						fi
+
+						read -rp "Press enter to return..."
+						;;
+					"Delete Group")
+						cmd="cut -d: -f1 /etc/group"
+						log "$TOOLBOX_USER listed groups using '$cmd"
+						echo ""
+						echo ""
+						echo -e "\nListing groups"
+						sleep 1
+						echo "[$TOOLBOX_USER@$HOST]$ $cmd"
+						eval "$cmd"
+						echo ""
+						echo ""
+
+						read -rp "Enter group name to delete: " group
+						[[ -z "$group" ]] && echo "No group name entered. Returning..." && break
+
+						if ! getent group "$group" &>/dev/null; then
+							echo "Error: Group '$group' does not exist."
+							read -rp "Press enter to return..."
+							break
+						fi
+							cmd="groupdel $group"
+							echo "[$TOOLBOX_USER@$HOST]$ $cmd"
+							$cmd | tee -a "$LOG_FILE"
+							log "$TOOLBOX_USER deleted the group: $group"
+							echo ""
+							echo ""
+
+						read -rp "Press enter to return..."
+						;;
+					"Back")
+						continue
+				esac
+				;;
+			"Account Info & Listing")
+				acc=$(echo -e "Back\nShow User Info\nShow Last Logins\nShow Active Users\nList All Users\nList All Groups" | fzf)
+				if [[ -z "$acc" ]]; then
+					echo "No choice selected. Returning..."
+					sleep 2
+					continue
+				fi
+				
+				case $acc in
+					"List All Groups")
+						cmd="cut -d: -f1 /etc/group"
+						log "$TOOLBOX_USER listed groups using '$cmd"
+						echo ""
+						echo ""
+						echo -e "\nListing groups"
+						sleep 1
+						echo "[$TOOLBOX_USER@$HOST]$ $cmd"
+						eval "$cmd"
+						echo ""
+						echo ""
+
+						read -rp "Press enter to return..."
+						;;
+					"List All Users")
+						log "$TOOLBOX_USER listed users using 'awk -F: '\''\$3 >= 1000 && \$1 != \"nobody\" {print \$1}'\'' /etc/passwd'"
+						echo ""
+						echo ""
+						echo -e "\nListing users"
+						sleep 1
+						echo "[$TOOLBOX_USER@$HOST]$ awk -F: '\$3 >= 1000 && \$1 != \"nobody\" {print \$1}' /etc/passwd"
+						echo ""
+						awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd
+						echo ""
+						echo ""
+
+						read -rp "Press enter to return..."
+						;;
+					"Show Active Users")
+						cmd="w"
+						log "$TOOLBOX_USER showed active users using '$cmd'"
+						echo ""
+						echo ""
+						echo "[$TOOLBOX_USER@$HOST]$ $cmd"
+						eval "$cmd"
+						echo ""
+						echo ""
+
+						read -rp "Press enter to return..."
+						;;
+					"Show Last Logins")
+						cmd="last"
+						log "$TOOLBOX_USER showed login history using '$cmd'"
+						echo ""
+						echo ""
+						echo "[$TOOLBOX_USER@$HOST]$ $cmd"
+						eval "$cmd"
+						echo ""
+						echo ""
+
+						read -rp "Press enter to return..."
+						;;
+					"Show User Info")
+						log "$TOOLBOX_USER listed users using 'awk -F: '\''\$3 >= 1000 && \$1 != \"nobody\" {print \$1}'\'' /etc/passwd'"
+						echo ""
+						echo ""
+						echo -e "\nListing user info..."
+						sleep 1
+						echo "[$TOOLBOX_USER@$HOST]$ awk -F: '\$3 >= 1000 && \$1 != \"nobody\" {print \$1}' /etc/passwd"
+						echo ""
+						awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd
+						echo ""
+						echo ""
+
+						read -rp "Enter username to show info: " username
+						[[ -z "$username" ]] && echo "Invalid username. Returning..." && break
+
+						cmd2="id $username"
+						log "$TOOLBOX_USER showed info for $username using '$cmd2'"
+						echo ""
+						echo ""
+						echo "[$TOOLBOX_USER@$HOST]$ $cmd2"
+						eval "$cmd2"
+						echo ""
+						echo ""
+
+						read -rp "Press enter to return..."
+						;;
+					"Back")
+						echo ""
+						echo ""
+						break
+						;;
+				esac
 				;;
 			"Show Firewall Status")
 				cmd1="ufw status"
@@ -1584,10 +2008,14 @@ sec_mgmt() {
 					echo "[$TOOLBOX_USER@$HOST]$ $cmd2"
 					$cmd2 | tee -a "$LOG_FILE"
 					log "$TOOLBOX_USER enabled the firewall using '$cmd2'"
+					echo ""
+					echo ""
 				elif [[ "$ans" == "OFF" ]]; then
 					echo "[$TOOLBOX_USER@$HOST]$ $cmd3"
 					$cmd3 | tee -a "$LOG_FILE"
 					log "$TOOLBOX_USER disabled the firewall using '$cmd3'"
+					echo ""
+					echo ""
 				else
 					echo "No changes made."
 				fi
@@ -1658,7 +2086,7 @@ sec_mgmt() {
 						fi
 						;;
 						"Back")
-						continue
+							continue
 						;;
 				esac
 				;;
