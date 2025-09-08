@@ -50,7 +50,7 @@ if [[ -z "$pkg_mgr_found" ]]; then
 	exit 1
 fi
 
-SCR_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+SRC_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 ENV_FILE="$SRC_DIR/.configs/.env"
 DEST_DIR="/opt/The-Abyss"
 TOOLBOX_DIR="$DEST_DIR/abyss-toolbox"
@@ -169,6 +169,11 @@ fi
 
 exec "$SOURCE_SCRIPT" "$@"
 EOF
+
+	chmod 755 "$SOURCE_SCRIPT" "$FUNC_FILE" "$LAUNCHER"
+	log "Installed to $LAUNCHER"
+	sleep 1
+fi
 
 # Initialization
 

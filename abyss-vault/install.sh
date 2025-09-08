@@ -50,7 +50,6 @@ if [[ -z "$pkg_mgr_found" ]]; then
 	exit 1
 fi
 
-# Defaults and paths (compute dynamically)
 SRC_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 ENV_FILE="$SRC_DIR/.configs/.env"
 DEST_DIR="/opt/The-Abyss"
@@ -64,17 +63,15 @@ CHECKSUM_DIR="$VAULT_DIR/checksum"
 
 echo "[*] Installing The Abyss Sysadmin Vault..."
 
-# Create log dir and file early
 mkdir -p "$LOG_DIR"
 touch "$LOG_FILE"
 chmod 644 "$LOG_FILE"
 chown root:root "$LOG_FILE"
 log "Starting installation from $SRC_DIR"
 
-# Load or create .env
-# echo "DEBUG: ENV_FILE=$ENV_FILE"
-mkdir -p "$(dirname "$ENV_FILE")"  # Ensure .configs directory exists
-chmod 755 "$(dirname "$ENV_FILE")"  # Set directory permissions
+echo "Ensuring .configs directory exists..."
+mkdir -p "$(dirname "$ENV_FILE")"
+chmod 755 "$(dirname "$ENV_FILE")"
 
 echo "Creating or updating .env file..."
 cat << EOF > "$ENV_FILE"
@@ -89,7 +86,6 @@ chmod 644 "$ENV_FILE"
 chown root:root "$ENV_FILE"
 log "Created or updated .env file at $ENV_FILE"
 
-# Update or append vars to .env
 update_or_append() {
     local key="$1" value="$2"
     if grep -q "^$key=" "$ENV_FILE"; then
@@ -120,7 +116,6 @@ update_or_append "PKG_MGR" "\"$pkg_mgr_found\""
 
 source "$ENV_FILE"
 
-# Check required files
 for file in vault.sh functions.sh; do
 	if [[ ! -f "$SRC_DIR/$file" ]]; then
 		echo "Error: $file not found."
@@ -129,7 +124,6 @@ for file in vault.sh functions.sh; do
 	fi
 done
 
-# Check if already installed
 if [[ -f "$LAUNCHER" ]]; then
 	echo "Already installed at $LAUNCHER. Skipping copy."
 else
@@ -522,7 +516,6 @@ prompt_confirm() {
 		echo
 		echo
 
-# Apply fzf theme based on ABYSS_FZF_THEME
 USER_HOME=$(getent passwd "$ABYSS_USER" | cut -d: -f6)
 SHELL_CONFIG=""
 if [[ -n "${ZSH_VERSION:-}" ]]; then
