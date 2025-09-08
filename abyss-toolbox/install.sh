@@ -51,7 +51,7 @@ if [[ -z "$pkg_mgr_found" ]]; then
 fi
 
 SCR_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-ENV_FILE="$TOOLBOX_DIR/.configs/.env"
+ENV_FILE="$SRC_DIR/.configs/.env"
 DEST_DIR="/opt/The-Abyss"
 TOOLBOX_DIR="$DEST_DIR/abyss-toolbox"
 LOG_DIR="/var/log/The-Abyss/.logs"
