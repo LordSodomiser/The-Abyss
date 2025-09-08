@@ -528,7 +528,7 @@ prompt_confirm() {
 		echo
 		echo
 
-USER_HOME=$(getent passwd "$ABYSS_USER" | cut -d: -f6)
+USER_HOME=$(getent passwd "ABYSS_USER" | cut -d: -f6)
 SHELL_CONFIG=""
 if [[ -n "${ZSH_VERSION:-}" ]]; then
 	SHELL_CONFIG="$USER_HOME/.zshrc"
