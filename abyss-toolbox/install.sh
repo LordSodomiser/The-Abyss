@@ -476,6 +476,8 @@ prompt_confirm() {
 			echo
 			echo
 			echo "Run with: cystoolbox"
+   			echo "Update with: cystoolbox --update"
+	  		echo "Uninstall with: cystoolbox --uninstall"
 			exit 0
 		fi
 
@@ -508,7 +510,7 @@ prompt_confirm() {
 			echo "Installing packages: ${unique_packages[*]}..."
 			if $pkg_install "${unique_packages[@]}"; then
 				for pkg in "${unique_packages[@]}"; do
-					pkg_log
+					pkg_log "$pkg"
 				done
 				: >"$LOG_INSTALLED_PKGS"
 				echo "${unique_packages[*]}" >> "$LOG_INSTALLED_PKGS"
