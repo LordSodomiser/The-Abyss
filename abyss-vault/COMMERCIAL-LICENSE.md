@@ -1,6 +1,6 @@
-# Commercial License for The Abyss Sysadmin Toolbox
+# Commercial License for The Abyss Sysadmin Vault
 
-**Version:** 0.2.1 
+**Version:** 0.2.1  
 **Last Updated:** 2025-09-07
 
 This software is dual-licensed.

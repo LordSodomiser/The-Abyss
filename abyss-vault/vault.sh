@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# The Abyss Sysadmin Toolbox
+# The Abyss Sysadmin Vault
 # Copyright (c) 2025 LordSodomiser
 # Licensed under the Mozilla Public License 2.0 or commercial license.
 # 
@@ -13,11 +13,11 @@
 
 set -Eeuo pipefail
 
-ENV_FILE="/opt/The-Abyss/abyss-toolbox/.configs/.env"
+ENV_FILE="/opt/The-Abyss/abyss-vault/.configs/.env"
 if [[ -f "$ENV_FILE" ]]; then
     source "$ENV_FILE"
 else
-	echo "Error: .env file not found at $ENV_FILE, the toolbox environment may not be initialized. Please run install.sh first."
+	echo "Error: .env file not found at $ENV_FILE, the vault environment may not be initialized. Please run install.sh first."
 	exit 1
 fi
 
@@ -29,19 +29,18 @@ else
 fi
 
 if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
-	handling "$@"
+	handling "$0"
 	exit 0
 fi
 
 if [[ $EUID -ne 0 ]]; then
-	echo "Root privileges are required to run this script."
-	read -rp "Do you want to run it with sudo now? [Y/n]: " ans
+	echo "Root privileges required to run this installation."
+	read -rp "Do you want to run with sudo now? [Y/n]: " ans
 	ans=${ans:-Y}
-
 	if [[ "$ans" =~ ^([yY]|[Yy][Ee][Ss])$ ]]; then
+		sudo -v || { echo "Failed to get sudo."; exit 1; }
 		exec sudo "$0" "$@"
 	else
-		echo "Exiting..."
 		exit 1
 	fi
 fi
@@ -56,10 +55,8 @@ sleep 3
 
 check_dependencies
 
-log "$ABYSS_USER started The Abyss Sysadmin Toolbox"
-
 while true; do
-	choice=$(echo -e "Exit\nSystem Monitoring\nSystem Information\nService Statuses\nSecurity Management\nNetwork Diagnostics\nNetwork Configuration\nLog Viewing\nFile System Checks\nFile Management\nDisk Management" | fzf --prompt="Main Menu > ")
+	choice=$(echo -e "Exit\nVault Management\nUtilities\nSecure Deletion\nNetwork & OpSec\nKey Management\nFilesystem Tools\nBackup & Archive\nAdvanced Security" | fzf --prompt="Main Menu > ")
 
 	if [[ -z "$choice" ]]; then
 		echo "No selection made. Possibly Cancelled..."
@@ -68,18 +65,16 @@ while true; do
 	fi
 
 	case "$choice" in
-		"Disk Management") disk_mgmt ;;
-		"File Management") file_mgmt ;;
-		"File System Checks") file_sys_chks ;;
-		"Log Viewing") log_viewing ;;
-		"Network Configuration") net_config ;;
-		"Network Diagnostics") net_diag ;;
-		"Security Management") sec_mgmt ;;
-		"Service Statuses") srv_stat ;;
-		"System Information") sys_info ;;
-		"System Monitoring") sys_mon ;;
+		"Advanced Security") advsec_menu ;;
+		"Backup & Archive") backup_menu ;;
+		"Filesystem Tools") fs_menu ;;
+		"Key Management") key_menu ;;
+		"Network & OpSec") net_menu ;;
+		"Secure Deletion") wipe_menu ;;
+		"Utilities") util_menu ;;
+		"Vault Management") vault_menu ;;
 		"Exit")
-			log "$ABYSS_USER exited The Abyss Sysadmin Toolbox"
+			log "$ABYSS_USER exited The Abyss Sysadmin Vault"
 			echo ""
 			echo ""
 			show_exit

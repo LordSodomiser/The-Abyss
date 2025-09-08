@@ -1,25 +1,26 @@
 # The-Abyss
 
-A lightweight, Bash-based sysadmin toolbox for secure and efficient management of headless Linux servers. Designed for simplicity and zero dependencies, The-Abyss Sysadmin Toolbox streamlines server administration with essential utilities. Future expansions include tools like Modular Dotfile Manager, TUI .onion Site Manager, and Offline Encrypted Vault Generator.
+A lightweight, Bash-based sysadmin toolbox for secure and efficient management of headless Linux servers. Designed for simplicity and zero dependencies, The-Abyss Sysadmin Toolbox streamlines server administration with essential utilities. Now includes the Abyss Vault for secure storage and management, with potential for more features in the future.
 
 ## Features
 
 - **Lightweight**: Zero-dependency Bash scripts for minimal footprint.
 - **Secure**: Focus on secure system management practices.
 - **Portable**: Runs on most Linux distributions with distro detection.
-- **Evolving**: Core toolbox is functional; additional modules in development.
+- **Evolving**: Core toolbox and vault are functional; more enhancements planned.
+- **New Functions**: Added `--update` and `--uninstall` options for streamlined management.
 
 ## SHA512 Checksums
 
 Verify the integrity of downloaded scripts with these SHA512 checksums:
 
 ```
-993f7d6708d7bc0e27d9145e89ac4cdf3c74c353c2dc0b14e4f381449ea870fbd8ba41772f7f1b6624b215a71dae5c741dcea96cff010cc1403726b6cc5837aa  ./abyss-toolbox/functions.sh
-f6b1596d47b41c39f68be3fa89a3127ca06cec1804a01ab8418b0e0ac3428ea82ab252b7e09991eb180e8e72405a471bb2d7d8f8c10a1e1a4b36e10969de1800  ./abyss-toolbox/initialize.sh
-865272cd4e03a3312fa762a4629a443454596493b3421b3c9d7789743f6f6c119d9a3a91ad2a0151906d74d02adc558adada948cdd51b9a62ef2c06715720969  ./abyss-toolbox/install.sh
-db525f79ed89b4b640de54909e76a891c545167594c9b5bf44195e6d9e804839e3b45a4c73148f7c7b8a739fb6d2031b3a8421cd0acee54ed7cb72611ae64c6e  ./abyss-toolbox/toolbox.sh
-9c1e82b6f15e0ae8a16bf0a061725a38e38cd1f6b050e97612ebc15728d83bcd872fd803e13362e6fcc3f18e7ae82b6cd0736a41e10c8a7bbf672d95fac919a8  ./abyss-toolbox/uninstall.sh
-6b7cc009ffcf3fabba6528977b0368f05a2054ba0331ea79410be1ce8611a4c75477b224ece4ec8bb14b87b866f0ce298d19f5a18cc587fcb0dae8c351e07476  ./abyss-toolbox/update.sh
+b71f44e434a1dddb515d4876ee698eaff6745be026ac5e43c620facf4c726790a27aa0a3b27419d31bc4bc55009d7b940f717acfd7eba82ab6bee67c37b08938  ./abyss-toolbox/functions.sh
+7fcd31dbad753d62dcebabccf4f998acb9c4d066b2e35b3891ab4cbb4c27c734bfd69b79da158ea1a68da69c8696964c6343954b966e34f0e966d64d80787106  ./abyss-toolbox/install.sh
+11c67d3f18c784d1388adb6dce5f7374791b14e6ba5dee7ee64521af5722a011375fa63dbcf40ea53048c66f0e373c8079dcfac2d724cdf622adc94563c706db  ./abyss-toolbox/toolbox.sh
+dc1b6523057f9d9cb7d6041f1c89580dccb9577e1385e00376529e12163272bc284c727a4ab3cc2f84504c6f388adf3320746ec990d57829faa139e1cd59c57b  ./abyss-vault/functions.sh
+fe33466cce13c14005f2d5791526c2b59249a72e581f40ed31ad2190bb703a4dbdeb02ece3ad596488486ca0af8ecd152a2e3fc54b7a7a958e10d7c23f2cf99f  ./abyss-vault/install.sh
+3ac5908ecf12ccedf5ec8c8f895f58cc0dcee8331ded5e0424089a3372fbef5472c616fbb1a13b22a7860a384c744c1d212dcff2627d81f2e9cc9daff2b2ee6f  ./abyss-vault/vault.sh
 ```
 
 ### Verifying Script Integrity
@@ -30,7 +31,7 @@ To ensure scripts haven't been tampered with, run:
 sha512sum --check CHECKSUM
 ```
 
-This compares downloaded scripts against the listed SHA512 hashes. Alternatively, use the provided verification script:
+Alternatively, use the provided verification script:
 
 ```bash
 chmod +x verify
@@ -49,40 +50,46 @@ chmod +x verify
    cd /tmp
    ```
 
-   Download and extract the latest release (v0.1.1):
+   Download the latest release (v0.1.1). The `git clone` method is recommended as it provides the latest updates directly from the GitHub repository, which may include newer features and fixes still undergoing testing. The `wget` and `curl` options are for stable release tarballs, which undergo more extensive testing but may lag behind the repository:
 
-   - **Using git clone**:
+   - **Using git clone** (recommended for latest updates):
      ```bash
      git clone https://github.com/LordSodomiser/The-Abyss.git
      ```
 
-   - **Using wget**:
+   - **Using wget** (stable release):
      ```bash
      wget https://github.com/LordSodomiser/The-Abyss/releases/download/0.1.1/abyss-0.1.1.tar.xz
      ```
 
-   - **Using curl**:
+   - **Using curl** (stable release):
      ```bash
      curl -LO https://github.com/LordSodomiser/The-Abyss/releases/download/0.1.1/abyss-0.1.1.tar.xz
      ```
-     
-3. **Extract and Prepare (if using tarball)**
+
+2. **Extract and Prepare (if using tarball)**
 
    ```bash
    tar -xJvf abyss-0.1.1.tar.xz
+   ```
+
+3. **Set Permissions**
+
+   Navigate to either the toolbox or vault directory and make scripts executable:
+
+   ```bash
    cd The-Abyss/abyss-toolbox
    chmod +x *.sh
    ```
 
-4. **Initialize the Environment**
-
-   Sets up traps, detects your distro, and ensures proper permissions:
+   Or, for the vault:
 
    ```bash
-   ./initialize.sh
+   cd The-Abyss/abyss-vault
+   chmod +x *.sh
    ```
 
-5. **Install the Toolbox**
+4. **Install the Toolbox or Vault**
 
    Installs dependencies, adds The-Abyss to your `$PATH`, and offers cleanup:
 
@@ -90,7 +97,7 @@ chmod +x verify
    ./install.sh
    ```
 
-6. **Invoke the Abyss**
+5. **Invoke the Abyss**
 
    Run the toolbox:
 
@@ -98,13 +105,51 @@ chmod +x verify
    cystoolbox
    ```
 
-   Or, if you prefer the full path:
+   Or, run the vault:
+
+   ```bash
+   cadavault
+   ```
+
+   Alternatively, use the full path:
 
    ```bash
    /opt/The-Abyss/abyss-toolbox/toolbox.sh
    ```
 
+   Or, for the vault:
+
+   ```bash
+   /opt/The-Abyss/abyss-vault/vault.sh
+   ```
+
    > **Note**: If you ran cleanup, the `/tmp/The-Abyss` directory is removed. Use `cd` to navigate to a new directory.
+
+6. **Update or Uninstall**
+
+   Update the toolbox or vault to the latest version:
+
+   ```bash
+   cystoolbox --update
+   ```
+
+   Or, for the vault:
+
+   ```bash
+   cadavault --update
+   ```
+
+   Uninstall the toolbox or vault:
+
+   ```bash
+   cystoolbox --uninstall
+   ```
+
+   Or, for the vault:
+
+   ```bash
+   cadavault --uninstall
+   ```
 
 ## Contributing
 
