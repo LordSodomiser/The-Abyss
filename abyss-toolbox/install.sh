@@ -98,7 +98,7 @@ update_or_append() {
 update_or_append "ABYSS_USER" "\"\${SUDO_USER:-\$USER}\""
 update_or_append "ABYSS_OS" "\"\$(if [[ -f /etc/os-release ]]; then grep '^PRETTY_NAME=' /etc/os-release | cut -d= -f2 | tr -d '\"'; else echo 'Unknown'; fi)\""
 update_or_append "ABYSS_INSTALL_DATE" "\"\$(date '+%Y-%m-%d %H:%M:%S')\""
-update_or_append "LOG_INSTALED_PKGS" "\"$TOOLBOX_DIR/installed-pkgs.txt\""
+update_or_append "LOG_INSTALLED_PKGS" "\"$TOOLBOX_DIR/installed-pkgs.txt\""
 update_or_append "TOOLBOX_PATH" "\"$TOOLBOX_DIR\""
 update_or_append "LAUNCHER" "\"$LAUNCHER\""
 update_or_append "SOURCE_SCRIPT" "\"$SOURCE_SCRIPT\""
