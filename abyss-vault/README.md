@@ -167,7 +167,7 @@ The **Abyss Sysadmin Vault** is the hardened counterpart to the **Abyss Toolbox*
 Verify the integrity of downloaded scripts with these SHA512 checksums:
 
 ```
-dc1b6523057f9d9cb7d6041f1c89580dccb9577e1385e00376529e12163272bc284c727a4ab3cc2f84504c6f388adf3320746ec990d57829faa139e1cd59c57b  ./abyss-vault/functions.sh
+28ecd71e160271c807d9668f379ac270f8c548e8fa74cc286b3c03954e8d8903b1986b9d6129e4c10da7d03b15e3c94f139cb572cc14ceda81e9d56195a55238  ./abyss-vault/functions.sh
 6a537ae113c01843db98b15b0769055d6f52dbd2c84462463ce40afc7bb8acbb1649047c6a6ce625351e9a8a13c54eb026747247a8b9a3d880128e3d4e5c600b  ./abyss-vault/install.sh
 3ac5908ecf12ccedf5ec8c8f895f58cc0dcee8331ded5e0424089a3372fbef5472c616fbb1a13b22a7860a384c744c1d212dcff2627d81f2e9cc9daff2b2ee6f  ./abyss-vault/vault.sh
 ```

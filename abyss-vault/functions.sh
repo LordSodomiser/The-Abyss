@@ -574,7 +574,7 @@ EOF
 
 advsec_menu() {
 	while true; do
-		choice=$(echo -e "Back\nShamir’s Secret Sharing\nIntegrity Check\nEnable 2FA Unlock" | fzf --prompt="AdvSec > ")
+		choice=$(echo -e "Back\nShamir’s Secret Sharing\nIntegrity Check\nEnable 2FA Unlock" | fzf)
 
 		case "$choice" in
 			"Enable 2FA Unlock")
@@ -734,7 +734,7 @@ advsec_menu() {
 
 backup_menu() {
 	while true; do
-		choice=$(echo -e "Back\nSync Vault with Device\nExtract Archive\nArchive Vault Data" | fzf --prompt="Backup > ")
+		choice=$(echo -e "Back\nSync Vault with Device\nExtract Archive\nArchive Vault Data" | fzf)
 
 		case "$choice" in
 			"Archive Vault Data")
@@ -869,7 +869,7 @@ backup_menu() {
 
 fs_menu() {
 	while true; do
-		choice=$(echo -e "Back\nShow Disk Info\nResize Vault\nFormat XFS\nFormat NTFS\nFormat ext4\nFormat FAT32/exFAT\nFormat Btrfs\nCheck Filesystem Health" | fzf --prompt="FS > ")
+		choice=$(echo -e "Back\nShow Disk Info\nResize Vault\nFormat XFS\nFormat NTFS\nFormat ext4\nFormat FAT32/exFAT\nFormat Btrfs\nCheck Filesystem Health" | fzf)
 
 		case "$choice" in
 			"Check Filesystem Health")
@@ -1093,7 +1093,7 @@ fs_menu() {
 
 key_menu() {
 	while true; do
-		choice=$(echo -e "Back\nImport Keys\nGenerate Keys\nBackup Keys" | fzf --prompt="Keys > ")
+		choice=$(echo -e "Back\nImport Keys\nGenerate Keys\nBackup Keys" | fzf)
 
 		case "$choice" in
 			"Backup Keys")
@@ -1331,7 +1331,7 @@ EOF
 
 net_menu() {
 	while true; do
-		choice=$(echo -e "Back\nNetwork Connection Status\nForce Airgap Mode\nDisable Airgap Mode\nCheck for Mounted Devices" | fzf --prompt="Net > ")
+		choice=$(echo -e "Back\nNetwork Connection Status\nForce Airgap Mode\nDisable Airgap Mode\nCheck for Mounted Devices" | fzf)
 
 		case "$choice" in
 			"Check for Mounted Devices")
@@ -1352,6 +1352,37 @@ net_menu() {
 					echo "No stored interfaces found. Cannot restore network."
 					read -rp "Press enter to return..."
 					continue
+				fi
+
+				read -rp "Confirm restoring all network interfaces? [y/N]: " confirm
+				confirm=${confirm:-N}
+				if [[ "$confirm" =~ ^[yY]$ ]]; then
+					nmcli netowrking on
+
+					interfaces=($(cat /tmp/airgap_interfaces))
+
+					wired_interfaces=()
+					wireless_interfaces=()
+					for intf in "${interfaces[@]}"; do
+						if [[ -d "/sys/class/net/$intf/wireless" ]]; then
+							wireless_interfeaces+=("$intf")
+						else
+							wired_interfaces+=("$intf")
+						fi
+					done
+
+					for intf in "${wired_interfaces[@]}"; do
+						ip link set "$intf" up 2>/dev/null || true
+					done
+
+					for intf in "${wireless_interfaces[@]}"; do
+						ip link set "$intf" up 2>/dev/null || true
+					done
+
+					echo "Network interfaces restored (airgap mode disabled)..."
+					shred -v -n 3 -u /tmp/airgap_interfaces
+				else
+					echo "Aborted."
 				fi
 				read -rp "Press Enter to return..."
 				;;
@@ -1392,22 +1423,86 @@ net_menu() {
 			"Network Connection Status")
 				echo
 				echo "=== Network Device Status ==="
+				
+				rows=()
+				while IFS=: read -r dev type state conn; do
+					ip4_addr=$(ip -4 addr show "$dev" | awk '/inet /{print $2; exit}')
+					ip4_addr=${ip4_addr:-"--"}
+					ip6_addr=$(ip -6 addr show "$dev" | awk '/inet6 / && $2 !~ /^fe80::/ {print $2; exit}')
+					ip6_addr=${ip6_addr:-"--"}
 
-				printf "%-10s %-10s %-12s %-20s %-20s\n" "DEVICE" "TYPE" "STATE" "CONNECTION" "IP ADDRESS"
-				echo "---------------------------------------------------------------------------------------"
-
-				while read -r line; do
-					dev=$(echo "$line" | awk '{print $1}')
-					type=$(echo "$line" | awk '{print $2}')
-					state=$(echo "$line" | awk '{print $3}')
-					conn=$(echo "$line" | awk '{print $4}')
-
-					ip_addr=$(ip -4 addr show "$dev" | awk '/inet /{print $2; exit}')
-					ip_addr=${ip_addr:-"--"}
-
-					printf "%-10s %-10s %-12s %-20s %-20s\n" "$type" "$state" "$conn" "$ip_addr"
+					# Assign sort key: connected=0, others=1
+					if [[ "$state" == "connected" ]]; then
+						sort_key=0
+					else
+						sort_key=1
+					fi
+					
+					rows+=("$sort_key:$dev:$type:$state:$conn:$ip4_addr:$ip6_addr")
 				done < <(nmcli -t -f DEVICE,TYPE,STATE,CONNECTION dev status)
 
+				IFS=$'\n' sorted_rows=($(sort -t: -k1,1n <<< "${rows[*]}"))
+				unset IFS
+
+				header=("DEVICE" "TYPE" "STATE" "CONNECTION" "IPv4" "IPv6")
+				col_count=${#header[@]}
+
+				for ((i=0; i<col_count; i++)); do
+					max_len[$i]=${#header[i]}
+				done
+
+				for row in "${sorted_rows[@]}"; do
+					IFS=: read -r -a fields <<< "$row"
+					for ((i=1; i<=col_count; i++)); do
+						[[ ${#fields[i]} -gt ${max_len[i-1]} ]] && max_len[$((i-1))]=${#fields[i]}
+					done
+				done
+
+				for ((i=0; i<col_count; i++)); do
+					printf "%-${max_len[i]}s " "${header[i]}"
+				done
+				echo
+
+				for ((i=0; i<col_count; i++)); do
+					printf "%-${max_len[i]}s " "$(printf -- '-%.0s' $(seq 1 ${max_len[i]}))"
+				done
+				echo
+
+				RED='\033[0;31m'
+				GRAY='\033[0;90m'
+				DIM='\033[2m'
+				NC='\033[0m'
+					       
+				for row in "${sorted_rows[@]}"; do
+					IFS=: read -r -a fields <<< "$row"
+
+					dev="${fields[1]}"
+					type="${fields[2]}"
+					state="${fields[3]}"
+					conn="${fields[4]}"
+					ip4="${fields[5]}"
+					ip6="${fields[6]}"
+
+					if [[ "$state" == "unmanaged" || "$state" != "connected" ]]; then
+						base_color=$RED
+						conn_color=$DIM
+					else
+						base_color=$NC
+						conn_color=$NC
+					fi
+
+					[[ "$ip4" == "--" ]] && ip4_color=$GRAY || ip4_color=$base_color
+					[[ "$ip6" == "--" ]] && ip6_color=$GRAY || ip6_color=$base_color
+
+					printf "${base_color}%-${max_len[0]}s${NC} " "$dev"
+					printf "${base_color}%-${max_len[1]}s${NC} " "$type"
+					printf "${base_color}%-${max_len[2]}s${NC} " "$state"
+					printf "${conn_color}%-${max_len[3]}s${NC} " "$conn"
+					printf "${ip4_color}%-${max_len[4]}s${NC} " "$ip4"
+					printf "${ip6_color}%-${max_len[5]}s${NC} " "$ip6"
+					echo
+				done
+					       
 				echo
 				read -rp "Press enter to return..."
 				;;
@@ -1420,7 +1515,7 @@ net_menu() {
 
 util_menu() {
 	while true; do
-		choice=$(echo -e "Back\nSystem Info\nHelp / Usage Tips\nClear Checksum Directory\nCheck Dependencies" | fzf --prompt="Util > ")
+		choice=$(echo -e "Back\nSystem Info\nHelp / Usage Tips\nClear Checksum Directory\nCheck Dependencies" | fzf)
 
 		case "$choice" in
 			"Check Dependencies")
@@ -1484,7 +1579,7 @@ util_menu() {
 
 wipe_menu() {
 	while true; do
-		choice=$(echo -e "Back\nWipe Free Space\nWipe Entire Device\nShred Files" | fzf --prompt="Wipe > ")
+		choice=$(echo -e "Back\nWipe Free Space\nWipe Entire Device\nShred Files" | fzf)
 
 		case "$choice" in
 			"Shred Files")
@@ -1596,7 +1691,7 @@ wipe_menu() {
 					tmpfile="$mount_point/._wipe_tempfile_"
 
 					dd if=/dev/zero of="$tmpfile" bs=1M status=progress 2>/dev/null || true
-					shred -v -n3 -u "$tmpfile"
+					shred -v -n 3 -u "$tmpfile"
 
 					echo "Free space securely wiped on $mount_point."
 					read -rp "Press enter to return..."
@@ -1612,7 +1707,7 @@ wipe_menu() {
 
 vault_menu() {
 	while true; do
-		choice=$(echo -e "Back\nUnmount Vault\nMount Vault\nCreate Vault\nBackup Vault Header" | fzf --prompt="Vault > ")
+		choice=$(echo -e "Back\nUnmount Vault\nMount Vault\nCreate Vault\nBackup Vault Header" | fzf)
 
 		case "$choice" in
 			"Backup Vault Header")
